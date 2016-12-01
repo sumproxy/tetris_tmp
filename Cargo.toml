@@ -1,0 +1,9 @@
+[package]
+name = "tetris"
+version = "0.1.0"
+authors = ["Sum Proxy <sum.proxy@gmail.com>"]
+
+[dependencies]
+gfx = "*"
+gfx_window_glutin = "*"
+glutin = "*"
