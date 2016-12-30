@@ -29,24 +29,16 @@ pub type DepthFormat = gfx::format::DepthStencil;
 
 gfx_defines!{
     vertex Vertex {
-        pos: [f32; 2] = "a_Pos",
-        color: [f32; 3] = "a_Color",
+        pos: [f32; 2] = "pos",
     }
 
     pipeline pipe {
-        vbuf: gfx::VertexBuffer<Vertex> = (),
-        out: gfx::RenderTarget<ColorFormat> = "Target0",
+        center: gfx::Global<[f32; 2]> = "u_center",
+        color: gfx::Global<[f32; 3]> = "u_color",
+        vbuf: gfx::VertexBuffer<[f32; 2]> = (),
+        out: gfx::RenderTarget<ColorFormat> = "target",
     }
 }
-
-const SQUARE: [Vertex; 6] = [
-    Vertex { pos: [ -0.5,  0.5 ], color: [1.0, 1.0, 1.0] },
-    Vertex { pos: [  0.5,  0.5 ], color: [1.0, 1.0, 1.0] },
-    Vertex { pos: [ -0.5, -0.5 ], color: [1.0, 1.0, 1.0] },
-    Vertex { pos: [  0.5, -0.5 ], color: [1.0, 1.0, 1.0] },
-    Vertex { pos: [  0.5,  0.5 ], color: [1.0, 1.0, 1.0] },
-    Vertex { pos: [ -0.5, -0.5 ], color: [1.0, 1.0, 1.0] },
-];
 
 const CLEAR_COLOR: [f32; 4] = [0.1, 0.1, 0.1, 1.0];
 
@@ -67,9 +59,13 @@ pub fn main() {
         include_bytes!("shader/triangle_150.glslf"),
         pipe::new()).unwrap();
 
-    let (vertex_buffer, slice) = factory.create_vertex_buffer_with_slice(&SQUARE, ());
+    let vertices = &[[-0.5, -0.5], [-0.5, 0.5], [0.5, -0.5], [0.5, 0.5]];
+    let indices = &[0, 1, 2, 0, 2, 3];
+    let (vertex_buffer, slice) = factory.create_vertex_buffer_with_slice(vertices, indices);
 
     let data = pipe::Data {
+        color: [1.0, 0.0, 0.0],
+        center: [0.5, 0.5],
         vbuf: vertex_buffer,
         out: main_color
     };

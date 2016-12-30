@@ -1,8 +1,8 @@
 #version 150 core
 
 in vec4 v_Color;
-out vec4 Target0;
+out vec4 target;
 
 void main() {
-    Target0 = v_Color;
+    target = v_Color;
 }
