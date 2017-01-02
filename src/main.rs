@@ -1,17 +1,4 @@
-// Copyright 2015 The Gfx-rs Developers.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
+#![feature(const_fn)]
 #[macro_use]
 extern crate gfx;
 extern crate gfx_window_glutin;
@@ -24,30 +11,14 @@ use glutin::Event::{Closed, KeyboardInput};
 use glutin::VirtualKeyCode::{Left, Right, Up, Down, Space, Escape};
 use glutin::ElementState::Pressed;
 
-pub type ColorFormat = gfx::format::Rgba8;
-pub type DepthFormat = gfx::format::DepthStencil;
+mod common;
+use common::{ColorFormat, DepthFormat, BOX, SCREEN, CLEAR_COLOR, pipe};
 
-gfx_defines!{
-    vertex Vertex {
-        pos: [f32; 2] = "pos",
-    }
 
-    pipeline pipe {
-        center: gfx::Global<[f32; 2]> = "u_center",
-        color: gfx::Global<[f32; 3]> = "u_color",
-        vbuf: gfx::VertexBuffer<[f32; 2]> = (),
-        out: gfx::RenderTarget<ColorFormat> = "target",
-    }
-}
-
-const CLEAR_COLOR: [f32; 4] = [0.1, 0.1, 0.1, 1.0];
-
-const BOX_SIZE: u32 = 20;
-
-pub fn main() {
+fn main() {
     let builder = glutin::WindowBuilder::new()
         .with_title("Tetris!".to_string())
-        .with_dimensions(10*BOX_SIZE, 22*BOX_SIZE);
+        .with_dimensions(SCREEN.width(), SCREEN.height());
 
     let (window, mut device, mut factory, main_color, _main_depth) =
         gfx_window_glutin::init::<ColorFormat, DepthFormat>(builder);
@@ -59,9 +30,7 @@ pub fn main() {
         include_bytes!("shader/triangle_150.glslf"),
         pipe::new()).unwrap();
 
-    let vertices = &[[-0.5, -0.5], [-0.5, 0.5], [0.5, -0.5], [0.5, 0.5]];
-    let indices = &[0, 1, 2, 0, 2, 3];
-    let (vertex_buffer, slice) = factory.create_vertex_buffer_with_slice(vertices, indices);
+    let (vertex_buffer, slice) = factory.create_vertex_buffer_with_slice(&BOX.vertices, &BOX.indices as &[u16]);
 
     let data = pipe::Data {
         color: [1.0, 0.0, 0.0],
