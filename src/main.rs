@@ -35,7 +35,7 @@ fn main() {
 
     let data = pipe::Data {
         color: [1.0, 0.0, 0.0],
-        center: [0.5, 0.5],
+        center: [0.0, 0.0],
         vbuf: vertex_buffer,
         out: main_color
     };

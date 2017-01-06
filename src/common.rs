@@ -27,8 +27,9 @@ impl Screen {
     pub fn new() -> Self {
         let elem = Quad::new();
         let mut screen = Screen { x: 10, y: 22, clear_color: [0.1, 0.1, 0.1, 1.0], elem: elem };
-        let width = 1.0 / screen.elem.size as f32;
-        screen.elem.set_vertices(width);
+        let width = 1.0 / screen.x as f32;
+        let height = 1.0 / screen.y as f32;
+        screen.elem.set_vertices(width, height);
         screen
     }
     
@@ -55,12 +56,12 @@ impl Quad {
             size: 20,
         }
     }
-    fn set_vertices(&mut self, width: f32) {
+    fn set_vertices(&mut self, width: f32, height: f32) {
         self.vertices = [
-            Vertex { pos: [-width, -width] },
-            Vertex { pos: [-width,  width] },
-            Vertex { pos: [ width, -width] },
-            Vertex { pos: [ width,  width] },
+            Vertex { pos: [-width, -height] },
+            Vertex { pos: [-width,  height] },
+            Vertex { pos: [ width, -height] },
+            Vertex { pos: [ width,  height] },
         ]
     }
 }
