@@ -1,4 +1,3 @@
-#![feature(const_fn)]
 #[macro_use]
 extern crate gfx;
 extern crate gfx_window_glutin;
@@ -12,13 +11,15 @@ use glutin::VirtualKeyCode::{Left, Right, Up, Down, Space, Escape};
 use glutin::ElementState::Pressed;
 
 mod common;
-use common::{ColorFormat, DepthFormat, BOX, SCREEN, CLEAR_COLOR, pipe};
+use common::{ColorFormat, DepthFormat, Screen, pipe};
 
 
 fn main() {
+    let screen = Screen::new();
+    
     let builder = glutin::WindowBuilder::new()
         .with_title("Tetris!".to_string())
-        .with_dimensions(SCREEN.width(), SCREEN.height());
+        .with_dimensions(screen.width(), screen.height());
 
     let (window, mut device, mut factory, main_color, _main_depth) =
         gfx_window_glutin::init::<ColorFormat, DepthFormat>(builder);
@@ -30,7 +31,7 @@ fn main() {
         include_bytes!("shader/triangle_150.glslf"),
         pipe::new()).unwrap();
 
-    let (vertex_buffer, slice) = factory.create_vertex_buffer_with_slice(&BOX.vertices, &BOX.indices as &[u16]);
+    let (vertex_buffer, slice) = factory.create_vertex_buffer_with_slice(&screen.elem.vertices, &screen.elem.indices as &[u16]);
 
     let data = pipe::Data {
         color: [1.0, 0.0, 0.0],
@@ -65,7 +66,7 @@ fn main() {
             }
         }
         // draw a frame
-        encoder.clear(&data.out, CLEAR_COLOR);
+        encoder.clear(&data.out, screen.clear_color);
         encoder.draw(&slice, &pso, &data);
         encoder.flush(&mut device);
         window.swap_buffers().unwrap();

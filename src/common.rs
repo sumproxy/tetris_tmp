@@ -19,42 +19,48 @@ gfx_defines!{
 pub struct Screen {
     x: u32,
     y: u32,
+    pub clear_color: [f32; 4],
+    pub elem: Quad,
 }
 
-pub const SCREEN: Screen = Screen {
-    x: 10,
-    y: 22,
-};
-
 impl Screen {
-    pub const fn width(&self) -> u32 {
-        self.x * BOX.size
+    pub fn new() -> Self {
+        let elem = Quad::new();
+        let mut screen = Screen { x: 10, y: 22, clear_color: [0.1, 0.1, 0.1, 1.0], elem: elem };
+        let width = 1.0 / screen.elem.size as f32;
+        screen.elem.set_vertices(width);
+        screen
+    }
+    
+    pub fn width(&self) -> u32 {
+        self.x * self.elem.size
     }
 
-    pub const fn height(&self) -> u32 {
-        self.y * BOX.size
+    pub fn height(&self) -> u32 {
+        self.y * self.elem.size
     }
 }
 
 pub struct Quad {
     pub vertices: [Vertex; 4],
     pub indices: [u16; 6],
-    pub size: u32,
+    size: u32,
 }
 
-macro_rules! width {
-    () => (1.0 / SCREEN.width() as f32)
+impl Quad {
+    fn new() -> Self {
+        Quad {
+            vertices: [Vertex { pos: [0.0, 0.0] } ; 4],
+            indices: [0, 1, 2, 1, 2, 3],
+            size: 20,
+        }
+    }
+    fn set_vertices(&mut self, width: f32) {
+        self.vertices = [
+            Vertex { pos: [-width, -width] },
+            Vertex { pos: [-width,  width] },
+            Vertex { pos: [ width, -width] },
+            Vertex { pos: [ width,  width] },
+        ]
+    }
 }
-
-pub const BOX: Quad = Quad {
-    vertices: [
-        Vertex { pos: [-width!(), -width!()] },
-        Vertex { pos: [-width!(),  width!()] },
-        Vertex { pos: [ width!(), -width!()] },
-        Vertex { pos: [ width!(),  width!()] },
-    ],
-    indices: [0, 1, 2, 1, 2, 3],
-    size: 20,
-};
-
-pub const CLEAR_COLOR: [f32; 4] = [0.1, 0.1, 0.1, 1.0];
