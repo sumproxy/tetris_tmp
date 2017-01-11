@@ -1,7 +1,7 @@
 #[macro_use]
 extern crate gfx;
-extern crate gfx_window_glutin;
 extern crate glutin;
+extern crate gfx_window_glutin;
 
 use gfx::traits::FactoryExt;
 use gfx::Device;
@@ -11,6 +11,10 @@ use glutin::VirtualKeyCode::{Left, Right, Up, Down, Space, Escape};
 use glutin::ElementState::Pressed;
 
 mod common;
+mod app;
+
+use app::App;
+
 use common::{ColorFormat, DepthFormat, Screen, pipe};
 
 
@@ -40,9 +44,11 @@ fn main() {
         out: main_color
     };
 
+    let mut app = App::new(window, encoder);
+
     'main: loop {
         // loop over events
-        for event in window.poll_events() {
+        for event in app.window.poll_events() {
             match event {
                 KeyboardInput(_, _, Some(Escape)) | Closed => break 'main,
                 
@@ -66,10 +72,10 @@ fn main() {
             }
         }
         // draw a frame
-        encoder.clear(&data.out, screen.clear_color);
-        encoder.draw(&slice, &pso, &data);
-        encoder.flush(&mut device);
-        window.swap_buffers().unwrap();
+        app.encoder.clear(&data.out, screen.clear_color);
+        app.encoder.draw(&slice, &pso, &data);
+        app.encoder.flush(&mut device);
+        app.window.swap_buffers().unwrap();
         device.cleanup();
     }
 }
