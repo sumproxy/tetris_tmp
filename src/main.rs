@@ -28,7 +28,7 @@ fn main() {
     let (window, mut device, mut factory, main_color, _main_depth) =
         gfx_window_glutin::init::<ColorFormat, DepthFormat>(builder);
 
-    let mut encoder: gfx::Encoder<_, _> = factory.create_command_buffer().into();
+    let encoder: gfx::Encoder<_, _> = factory.create_command_buffer().into();
 
     let pso = factory.create_pipeline_simple(
         include_bytes!("shader/triangle_150.glslv"),
@@ -44,7 +44,7 @@ fn main() {
         out: main_color
     };
 
-    let mut app = App::new(window, encoder, device);
+    let mut app = App::new(window, encoder, device, slice);
 
     'main: loop {
         // loop over events
@@ -73,9 +73,9 @@ fn main() {
         }
         // draw a frame
         app.encoder.clear(&data.out, screen.clear_color);
-        app.encoder.draw(&slice, &pso, &data);
-        app.encoder.flush(&mut device);
+        app.encoder.draw(&app.slice, &pso, &data);
+        app.encoder.flush(&mut app.device);
         app.window.swap_buffers().unwrap();
-        device.cleanup();
+        app.device.cleanup();
     }
 }
