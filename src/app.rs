@@ -21,24 +21,25 @@ pub struct App<R, C, D>
           C: gfx::CommandBuffer<R>,
           D: gfx::Device,
 {
-    pub window: Window,
-    pub encoder: gfx::Encoder<R, C>,
-    pub device: D,
-    pub slice: gfx::Slice<R>,
-    pub pso: gfx::PipelineState<R, pipe::Meta>,
-    pub data: pipe::Data<R>,
-    pub screen: Screen,
+    window: Window,
+    encoder: gfx::Encoder<R, C>,
+    device: D,
+    slice: gfx::Slice<R>,
+    pso: gfx::PipelineState<R, pipe::Meta>,
+    data: pipe::Data<R>,
+    screen: Screen,
+    state: GameState,
 }
 
 impl<R, C, D> App<R, C, D>
     where R: gfx::Resources,
           C: gfx::CommandBuffer<R>,
-          D: gfx::Device {
-    pub fn handle_events(&self) -> GameState {
+          D: gfx::Device<Resources=R, CommandBuffer=C> {
+    pub fn handle_events(&mut self) {
         // loop over events
         for event in self.window.poll_events() {
             match event {
-                KeyboardInput(_, _, Some(Escape)) | Closed => return GameState::Quit,
+                KeyboardInput(_, _, Some(Escape)) | Closed => self.state = GameState::Quit,
                 
                 KeyboardInput(Pressed, _, Some(Left)) => {
                     println!("Left");
@@ -59,7 +60,6 @@ impl<R, C, D> App<R, C, D>
                 _ => (),
             }
         }
-        GameState::Running
     }
 
     pub fn draw_frame(&mut self) {
@@ -68,6 +68,13 @@ impl<R, C, D> App<R, C, D>
         self.encoder.flush(&mut self.device);
         self.window.swap_buffers().unwrap();
         self.device.cleanup();
+    }
+
+    pub fn is_running(&self) -> bool {
+        match self.state {
+            GameState::Running => true,
+            GameState::Quit => false,
+        }
     }
 }
    
@@ -106,5 +113,6 @@ pub fn new() -> GlApp {
           pso: pso,
           data: data,
           screen: screen,
+          state: GameState::Running,
     }
 }
