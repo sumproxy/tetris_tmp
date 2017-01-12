@@ -44,7 +44,7 @@ fn main() {
         out: main_color
     };
 
-    let mut app = App::new(window, encoder, device, slice);
+    let mut app = App::new(window, encoder, device, slice, pso);
 
     'main: loop {
         // loop over events
@@ -73,7 +73,7 @@ fn main() {
         }
         // draw a frame
         app.encoder.clear(&data.out, screen.clear_color);
-        app.encoder.draw(&app.slice, &pso, &data);
+        app.encoder.draw(&app.slice, &app.pso, &data);
         app.encoder.flush(&mut app.device);
         app.window.swap_buffers().unwrap();
         app.device.cleanup();
