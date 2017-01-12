@@ -44,7 +44,7 @@ fn main() {
         out: main_color
     };
 
-    let mut app = App::new(window, encoder);
+    let mut app = App::new(window, encoder, device);
 
     'main: loop {
         // loop over events
