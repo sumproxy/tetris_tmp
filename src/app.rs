@@ -1,21 +1,27 @@
-extern crate gfx;
-extern crate glutin;
-extern crate gfx_window_glutin;
-
+use gfx;
 use gfx::traits::FactoryExt;
 
-use self::glutin::Event::{Closed, KeyboardInput};
-use self::glutin::VirtualKeyCode::{Left, Right, Up, Down, Space, Escape};
-use self::glutin::ElementState::Pressed;
+use gfx_window_glutin;
+use gfx_device_gl as gfx_gl;
+
+use glutin::{Window, WindowBuilder};
+use glutin::Event::{Closed, KeyboardInput};
+use glutin::VirtualKeyCode::{Left, Right, Up, Down, Space, Escape};
+use glutin::ElementState::Pressed;
 
 use common::{ColorFormat, DepthFormat, Screen, pipe};
+
+pub enum GameState {
+    Quit,
+    Running,
+}
 
 pub struct App<R, C, D>
     where R: gfx::Resources,
           C: gfx::CommandBuffer<R>,
           D: gfx::Device,
 {
-    pub window: glutin::Window,
+    pub window: Window,
     pub encoder: gfx::Encoder<R, C>,
     pub device: D,
     pub slice: gfx::Slice<R>,
@@ -27,33 +33,57 @@ pub struct App<R, C, D>
 impl<R, C, D> App<R, C, D>
     where R: gfx::Resources,
           C: gfx::CommandBuffer<R>,
-          D: gfx::Device,
-{
+          D: gfx::Device {
+    pub fn handle_events(&self) -> GameState {
+        // loop over events
+        for event in self.window.poll_events() {
+            match event {
+                KeyboardInput(_, _, Some(Escape)) | Closed => return GameState::Quit,
+                
+                KeyboardInput(Pressed, _, Some(Left)) => {
+                    println!("Left");
+                },
+                KeyboardInput(Pressed, _, Some(Right)) => {
+                    println!("Right");
+                },
+                KeyboardInput(Pressed, _, Some(Up)) => {
+                    println!("Up");
+                },
+                KeyboardInput(Pressed, _, Some(Down)) => {
+                    println!("Down");
+                },
+                KeyboardInput(Pressed, _, Some(Space)) => {
+                    println!("Space");
+                },
+                
+                _ => (),
+            }
+        }
+        GameState::Running
+    }
+
+    pub fn draw_frame(&mut self) {
+        self.encoder.clear(&self.data.out, self.screen.clear_color);
+        self.encoder.draw(&self.slice, &self.pso, &self.data);
+        self.encoder.flush(&mut self.device);
+        self.window.swap_buffers().unwrap();
+        self.device.cleanup();
+    }
 }
    
-pub fn new<R, C, D>(
-    w: glutin::Window,
-    e: gfx::Encoder<R, C>,
-    d: D,
-    s: gfx::Slice<R>,
-    pso: gfx::PipelineState<R, pipe::Meta>,
-    data: pipe::Data<R>
-) -> App<R, C, D>
-    where R: gfx::Resources,
-          C: gfx::CommandBuffer<R>,
-          D: gfx::Device,
-{
+pub type GlApp = App<gfx_gl::Resources, gfx_gl::CommandBuffer, gfx_gl::Device>;
 
+pub fn new() -> GlApp {
     let screen = Screen::new();
     
-    let builder = glutin::WindowBuilder::new()
+    let builder = WindowBuilder::new()
         .with_title("Tetris!".to_string())
         .with_dimensions(screen.width(), screen.height());
 
-    let (window, mut device, mut factory, main_color, _main_depth) =
+    let (window, device, mut factory, main_color, _main_depth) =
         gfx_window_glutin::init::<ColorFormat, DepthFormat>(builder);
 
-    let encoder: gfx::Encoder<_, _> = factory.create_command_buffer().into();
+    let encoder = factory.create_command_buffer().into();
 
     let pso = factory.create_pipeline_simple(
         include_bytes!("shader/triangle_150.glslv"),
@@ -69,12 +99,12 @@ pub fn new<R, C, D>(
         out: main_color
     };
 
-    App::<R, C, D> { window: window,
-                         encoder: encoder,
-                         device: device,
-                         slice: slice,
-                         pso: pso,
-                         data: data,
-                         screen: screen,
+    App { window: window,
+          encoder: encoder,
+          device: device,
+          slice: slice,
+          pso: pso,
+          data: data,
+          screen: screen,
     }
 }

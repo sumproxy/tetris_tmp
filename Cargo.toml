@@ -6,4 +6,5 @@ authors = ["Sum Proxy <sum.proxy@gmail.com>"]
 [dependencies]
 gfx = "*"
 gfx_window_glutin = "*"
+gfx_device_gl = "*"
 glutin = "*"
