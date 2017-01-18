@@ -3,6 +3,8 @@ pub type DepthFormat = gfx::format::DepthStencil;
 
 use gfx;
 
+use bit_vec::BitVec;
+
 gfx_defines!{
     vertex Vertex {
         pos: [f32; 2] = "pos",
@@ -17,28 +19,29 @@ gfx_defines!{
 }
 
 pub struct Screen {
-    x: u32,
-    y: u32,
     pub clear_color: [f32; 4],
     pub elem: Quad,
+    frame: Frame,
 }
 
 impl Screen {
     pub fn new() -> Self {
         let elem = Quad::new();
-        let mut screen = Screen { x: 10, y: 22, clear_color: [0.1, 0.1, 0.1, 1.0], elem: elem };
-        let width = 1.0 / screen.x as f32;
-        let height = 1.0 / screen.y as f32;
+        let frame = Frame::new(10, 22);
+        let clear_color = [0.1, 0.1, 0.1, 1.0];
+        let mut screen = Screen { clear_color: clear_color, elem: elem, frame: frame };
+        let width = 1.0 / screen.frame.x() as f32;
+        let height = 1.0 / screen.frame.y() as f32;
         screen.elem.set_vertices(width, height);
         screen
     }
     
     pub fn width(&self) -> u32 {
-        self.x * self.elem.size
+        self.elem.size * self.frame.x() as u32
     }
 
     pub fn height(&self) -> u32 {
-        self.y * self.elem.size
+        self.elem.size * self.frame.y() as u32
     }
 }
 
@@ -63,5 +66,26 @@ impl Quad {
             Vertex { pos: [ width, -height] },
             Vertex { pos: [ width,  height] },
         ]
+    }
+}
+
+struct Frame {
+    inner: Vec<BitVec>
+}
+
+impl Frame {
+    fn new(x: usize, y: usize) -> Self {
+        let zeroes = BitVec::from_fn(x, |_| { false });
+        Frame {
+            inner: vec![zeroes; y],
+        }
+    }
+
+    fn x(&self) -> usize {
+        self.inner[0].len()
+    }
+
+    fn y(&self) -> usize {
+        self.inner.len()
     }
 }
