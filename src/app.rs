@@ -93,8 +93,8 @@ pub fn new() -> GlApp {
     let encoder = factory.create_command_buffer().into();
 
     let pso = factory.create_pipeline_simple(
-        include_bytes!("shader/triangle_150.glslv"),
-        include_bytes!("shader/triangle_150.glslf"),
+        include_bytes!("shader/tetris_150.glslv"),
+        include_bytes!("shader/tetris_150.glslf"),
         pipe::new()).unwrap();
 
     let (vertex_buffer, slice) = factory.create_vertex_buffer_with_slice(&screen.elem.vertices, &screen.elem.indices as &[u16]);
