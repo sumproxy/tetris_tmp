@@ -11,7 +11,7 @@ use glutin::ElementState::Pressed;
 
 use common::{ColorFormat, DepthFormat, Screen, pipe};
 
-pub enum GameState {
+enum GameState {
     Quit,
     Running,
 }
@@ -35,12 +35,14 @@ impl<R, C, D> App<R, C, D>
     where R: gfx::Resources,
           C: gfx::CommandBuffer<R>,
           D: gfx::Device<Resources=R, CommandBuffer=C> {
+
     pub fn handle_events(&mut self) {
         // loop over events
         for event in self.window.poll_events() {
             match event {
-                KeyboardInput(_, _, Some(Escape)) | Closed => self.state = GameState::Quit,
-                
+                KeyboardInput(_, _, Some(Escape)) | Closed => {
+                    self.state = GameState::Quit
+                }
                 KeyboardInput(Pressed, _, Some(Left)) => {
                     println!("Left");
                 },
@@ -56,7 +58,6 @@ impl<R, C, D> App<R, C, D>
                 KeyboardInput(Pressed, _, Some(Space)) => {
                     println!("Space");
                 },
-                
                 _ => (),
             }
         }
@@ -72,8 +73,8 @@ impl<R, C, D> App<R, C, D>
 
     pub fn is_running(&self) -> bool {
         match self.state {
-            GameState::Running => true,
             GameState::Quit => false,
+            _ => true,
         }
     }
 }
